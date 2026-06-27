@@ -94,3 +94,83 @@ fn write_blocks_to_file(file: &mut File, blocks: &[VttBlock]) -> Result<(), Proc
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_get_min_digits() {
+        let timestamp = TimeStamp {
+            hour: 0,
+            min: 1,
+            sec: 2,
+            milli: 3,
+        };
+        let digits = get_min_digits(&timestamp);
+        assert_eq!(digits, 2);
+    }
+
+    #[test]
+    fn test_get_min_digits_has_hour() {
+        let timestamp = TimeStamp {
+            hour: 1,
+            min: 1,
+            sec: 2,
+            milli: 3,
+        };
+        let digits = get_min_digits(&timestamp);
+        assert_eq!(digits, 2);
+    }
+
+    #[test]
+    fn test_get_min_digits_has_2_hours() {
+        let timestamp = TimeStamp {
+            hour: 2,
+            min: 1,
+            sec: 2,
+            milli: 3,
+        };
+        let digits = get_min_digits(&timestamp);
+        assert_eq!(digits, 3);
+    }
+
+    #[test]
+    fn test_format_lrc_timestamp() {
+        let timestamp = TimeStamp {
+            hour: 0,
+            min: 1,
+            sec: 2,
+            milli: 3,
+        };
+        let digits = get_min_digits(&timestamp);
+        let result = format_lrc_timestamp(&timestamp, digits);
+        assert_eq!(result, "[01:02.00]");
+    }
+
+    #[test]
+    fn test_format_lrc_timestamp_2_hours() {
+        let timestamp = TimeStamp {
+            hour: 2,
+            min: 1,
+            sec: 2,
+            milli: 3,
+        };
+        let digits = get_min_digits(&timestamp);
+        let result = format_lrc_timestamp(&timestamp, digits);
+        assert_eq!(result, "[121:02.00]");
+    }
+
+    #[test]
+    fn test_format_lrc_timestamp_trim_milli() {
+        let timestamp = TimeStamp {
+            hour: 0,
+            min: 1,
+            sec: 2,
+            milli: 987,
+        };
+        let digits = get_min_digits(&timestamp);
+        let result = format_lrc_timestamp(&timestamp, digits);
+        assert_eq!(result, "[01:02.98]");
+    }
+}
